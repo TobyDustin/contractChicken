@@ -1,0 +1,14 @@
+{
+  "name": "protochicken",
+  "version": "1.0.0",
+  "description": "With Porto chicken you can quickly prototype restful api’s with open api schemas from a the command line.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "protochicken"
+  ],
+  "author": "tobiasdustin",
+  "license": "Apache-2.0 "
+}
