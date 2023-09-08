@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const express = require("express");
 const { OpenApiValidator } = require("express-openapi-validate");
 const swaggerUi = require("swagger-ui-express");
@@ -9,7 +11,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const URL = require("url").URL;
 const fetch = require("node-fetch");
-
+console.log(__dirname)
 if(process.argv.length === 2){
   console.log('NO_FILE_FOUND: Please provide a file to load!')
   exit()
@@ -116,7 +118,7 @@ const handleMultipleExamples = (examples, req, res) => {
 };
 
 const getRequest = (req, res, operation) => {
-  
+
   const example =
     operation.responses["200"].content["application/json"].example || false;
   const examples =
