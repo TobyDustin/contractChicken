@@ -28,6 +28,11 @@ You can easily install Protochicken by running the following command:
 ```bash
 npm install -g protochicken
 ```
+Get up and running by downloading one of our <a href="/example_contracts/">Example Contracts</a> and then running:
+
+```bash
+npx protochicken [DOWNLOADED_CONTRACT_LOCATION]
+```
 
 ## Using Protochicken
 
