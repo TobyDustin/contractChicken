@@ -1,6 +1,6 @@
 {
   "name": "protochicken",
-  "version": "0.0.3",
+  "version": "0.0.10",
   "description": "With Porto chicken you can quickly prototype restful api’s with open api schemas from a the command line.",
   "repository": "https://github.com/TobyDustin/protochicken",
   "homepage": "https://github.com/TobyDustin/protochicken",
@@ -13,5 +13,11 @@
     "protochicken"
   ],
   "author": "tobiasdustin",
-  "license": "Apache-2.0 "
+  "license": "Apache-2.0 ",
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-openapi-validate": "^0.6.1",
+    "swagger-ui-express": "^5.0.0",
+    "yamljs": "^0.3.0"
+  }
 }

@@ -6,12 +6,12 @@ const swaggerUi = require("swagger-ui-express");
 const YAML = require("yamljs");
 const path = require("path");
 const { exit } = require("process");
-const fs =require('fs')
+const fs =require('fs');
+
 const app = express();
 const port = process.env.PORT || 3000;
 const URL = require("url").URL;
-const fetch = require("node-fetch");
-console.log(__dirname)
+console.log(process.cwd())
 if(process.argv.length === 2){
   console.log('NO_FILE_FOUND: Please provide a file to load!')
   exit()
@@ -24,7 +24,7 @@ const downloadFile = (async (url, path) => {
 })
 
 const loadFromFile = (loadFilename)=>{
-  const apiSpecPath = path.join(__dirname, loadFilename);
+  const apiSpecPath = path.join(process.cwd(), loadFilename);
 if (!fs.existsSync(apiSpecPath)) {
   console.log(`FILE_NOT_FOUND: File: ${loadFilename} was not found in this directory.`)
   exit()
