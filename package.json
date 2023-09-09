@@ -1,6 +1,6 @@
 {
   "name": "protochicken",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "With Porto chicken you can quickly prototype restful api’s with open api schemas from a the command line.",
   "repository": "https://github.com/TobyDustin/protochicken",
   "homepage": "https://github.com/TobyDustin/protochicken",
