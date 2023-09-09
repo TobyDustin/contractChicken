@@ -7,11 +7,11 @@ const YAML = require("yamljs");
 const path = require("path");
 const { exit } = require("process");
 const fs =require('fs');
-
+const colors = require('colors')
 const app = express();
 const port = process.env.PORT || 3000;
 const URL = require("url").URL;
-console.log(process.cwd())
+
 if(process.argv.length === 2){
   console.log('NO_FILE_FOUND: Please provide a file to load!')
   exit()
@@ -33,7 +33,6 @@ return YAML.load(apiSpecPath);
 }
 
 const loadFromURL = (url)=>{
-  console.log(url)
   return downloadFile(url, 'contract.yaml')
 }
 
@@ -154,12 +153,25 @@ const switchHTTPHeaders = (httpHeader, req, res, operation) => {
   }
 };
 
+const printHttpCode = (code)=>{
+  switch(code){
+    case 'POST':
+      return colors.inverse.bold.yellow(code)
+    case 'PUT':
+      return colors.inverse.bold.blue(code)
+    case 'DELETE':
+      return colors.inverse.bold.red(code)
+    default:
+      return colors.inverse.bold.green(code)
+  }
+}
+
 // Serve the OpenAPI documentation using Swagger UI
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(apiSpec));
 // Generate routes and handlers dynamically from the OpenAPI specification
 for (const [path, pathItem] of Object.entries(apiSpec.paths)) {
   for (const [httpMethod, operation] of Object.entries(pathItem)) {
-    console.log(`${httpMethod.toLocaleUpperCase()}: localhost:${port}${path}`);
+    console.log(printHttpCode(httpMethod.toLocaleUpperCase()) + `: localhost:${port}${path}`);
     app[httpMethod](path, validator.validate(httpMethod, path), (req, res) => {
       return switchHTTPHeaders(httpMethod, req, res, operation);
     });
