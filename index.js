@@ -6,13 +6,14 @@ const swaggerUi = require("swagger-ui-express");
 const YAML = require("yamljs");
 const path = require("path");
 const { exit } = require("process");
-const fs =require('fs');
+const fs = require('fs');
 const colors = require('colors')
 const app = express();
 const port = process.env.PORT || 3000;
 const URL = require("url").URL;
-
-if(process.argv.length === 2){
+const bodyParser = require('body-parser');
+app.use(bodyParser.json())
+if (process.argv.length === 2) {
   console.log('NO_FILE_FOUND: Please provide a file to load!')
   exit()
 }
@@ -23,29 +24,38 @@ const downloadFile = (async (url, path) => {
   //TODO: impliment
 })
 
-const loadFromFile = (loadFilename)=>{
+const loadFromFile = (loadFilename) => {
   const apiSpecPath = path.join(process.cwd(), loadFilename);
-if (!fs.existsSync(apiSpecPath)) {
-  console.log(`FILE_NOT_FOUND: File: ${loadFilename} was not found in this directory.`)
-  exit()
-}
-return YAML.load(apiSpecPath);
+  if (!fs.existsSync(apiSpecPath)) {
+    console.log(`FILE_NOT_FOUND: File: ${loadFilename} was not found in this directory.`)
+    exit()
+  }
+  return YAML.load(apiSpecPath);
 }
 
-const loadFromURL = (url)=>{
+const loadFromURL = (url) => {
   return downloadFile(url, 'contract.yaml')
 }
 
 const validateURL = (url) => {
-  try{
+  try {
     const url = new URL(loadFilename);
     return url.href;
-  } catch{
+  } catch {
     return false
   }
 }
 
-const switchLoadStrategy = (loadFilename)=>{
+const transformRequestBody = (req, res, example) => {
+  let body = req.body;
+  let exampleString = JSON.stringify(example)
+  Object.keys(body).forEach((key) => {
+    exampleString = exampleString.replaceAll(`/{${key}}/`, body[key])
+  })
+  return JSON.parse(exampleString)
+};
+
+const switchLoadStrategy = (loadFilename) => {
   return loadFromFile(loadFilename)
 }
 // Load your OpenAPI YAML document
@@ -78,7 +88,10 @@ const sendDelayedStatusCode = (code, delay, req, res) => {
   });
 };
 
-const handleSingleExample = (example, req, res) => {
+const handleSingleExample = (example, req, res, type = 'GET') => {
+  if (type !== 'GET') {
+    example = transformRequestBody(req, res, example)
+  }
   const { delay = false, status = false } = req.query;
   if (delay && status) {
     sendDelayedStatusCode(status, delay, req, res)
@@ -117,7 +130,6 @@ const handleMultipleExamples = (examples, req, res) => {
 };
 
 const getRequest = (req, res, operation) => {
-
   const example =
     operation.responses["200"].content["application/json"].example || false;
   const examples =
@@ -131,7 +143,7 @@ const getRequest = (req, res, operation) => {
 };
 
 
-const postRequest = (req, res, operation) =>{
+const postRequest = (req, res, operation) => {
   const example =
     operation.responses["200"].content["application/json"].example || false;
   const examples =
@@ -141,20 +153,22 @@ const postRequest = (req, res, operation) =>{
     handleMultipleExamples(examples, req, res);
   }
   if (example) {
-    return handleSingleExample(example, req, res);
+    return handleSingleExample(example, req, res, 'POST');
   }
-  
+
 }
 
 const switchHTTPHeaders = (httpHeader, req, res, operation) => {
   switch (httpHeader) {
+    case 'post':
+      return postRequest(req, res, operation)
     default:
       return getRequest(req, res, operation);
   }
 };
 
-const printHttpCode = (code)=>{
-  switch(code){
+const printHttpCode = (code) => {
+  switch (code) {
     case 'POST':
       return colors.inverse.bold.yellow(code)
     case 'PUT':

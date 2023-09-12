@@ -47,7 +47,9 @@ paths:
                   hello:
                     type: string
               example:
-                hello: world! as a POST request
+                hello: world!
+                data: /{data}/
+
     put:
       tags:
         - Basic
