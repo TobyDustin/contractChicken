@@ -12,7 +12,9 @@ const app = express();
 const port = process.env.PORT || 3000;
 const URL = require("url").URL;
 const bodyParser = require('body-parser');
+const cors = require('cors')
 app.use(bodyParser.json())
+app.use(cors())
 if (process.argv.length === 2) {
   console.log('NO_FILE_FOUND: Please provide a file to load!')
   exit()
