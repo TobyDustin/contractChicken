@@ -90,7 +90,36 @@ const sendDelayedStatusCode = (code, delay, req, res) => {
   });
 };
 
+const sendFile = (req, res, example) => {
+  const { path: filepath } = example.payload;
+  const fileLocation = path.join(process.cwd(), filepath)
+  if (fs.existsSync(fileLocation)) {
+    return res.sendFile(fileLocation);
+  }
+  return res.send(example);
+}
+const redirect = (req, res, example) => {
+  const { url: urlIn } = example.payload;
+  const url = new URL(urlIn)
+  return res.redirect(url.toString());
+  // return res.send(example);
+}
+
+const actions = (req, res, example) => {
+  switch (example.action) {
+    case 'RETRIEVE_FILE':
+      return sendFile(req, res, example)
+    case 'REDIRECT':
+      return redirect(req, res, example)
+    default:
+      res.send(example)
+  }
+}
+
 const handleSingleExample = (example, req, res, type = 'GET') => {
+  if (example.action) {
+    return actions(req, res, example)
+  }
   if (type !== 'GET') {
     example = transformRequestBody(req, res, example)
   }
@@ -120,15 +149,16 @@ const getLocationAndQueryString = (queryString) => {
 
 const handleMultipleExamples = (examples, req, res) => {
   const { defaultExample, ...examplesnotincluingdefault } = examples;
-
   Object.keys(examplesnotincluingdefault).forEach((key) => {
     const { location, param, query } = getLocationAndQueryString(key);
+    console.log(location, param, query)
     if (req[location][param] === query) {
       return handleSingleExample(examples[key].value, req, res);
     } else {
       return handleSingleExample(defaultExample.value, req, res);
     }
   });
+  return handleSingleExample(defaultExample.value, req, res);
 };
 
 const getRequest = (req, res, operation) => {

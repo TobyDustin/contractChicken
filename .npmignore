@@ -2,3 +2,4 @@ node_modules/
 resources/
 example_contracts/
 package-lock.json
+index.html

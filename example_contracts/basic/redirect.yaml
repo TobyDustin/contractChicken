@@ -1,0 +1,30 @@
+openapi: 3.0.1
+info:
+  title: Hello World
+  version: v0
+servers:
+  - url: http://localhost:3000
+    description: Server URL
+paths:
+  /helloworld:
+    get:
+      tags:
+        - Basic
+        - HelloWorld
+        - GET
+      operationId: helloworldget
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                properties:
+                  hello:
+                    type: string
+              examples:
+                'defaultExample':
+                  value:
+                    action: 'REDIRECT'
+                    payload:
+                      url: 'https://dummyjson.com/products/1'
