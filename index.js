@@ -2,21 +2,21 @@
 
 const express = require("express");
 const { OpenApiValidator } = require("express-openapi-validate");
-const swaggerUi = require("swagger-ui-express");
 const YAML = require("yamljs");
 const path = require("path");
 const { exit } = require("process");
 const fs = require('fs');
-const colors = require('colors')
 const app = express();
-const port = process.env.PORT || 3000;
 const URL = require("url").URL;
 const bodyParser = require('body-parser');
-const cors = require('cors')
+const cors = require('cors');
+const { printLogo, print, printPath } = require("./src/logger");
+const uppercase = require("./src/utils/uppercase");
+const { POST, GET } = require("./src/constants");
 app.use(bodyParser.json())
 app.use(cors())
 if (process.argv.length === 2) {
-  console.log('NO_FILE_FOUND: Please provide a file to load!')
+  print('NO_FILE_FOUND: Please provide a file to load!')
   exit()
 }
 const loadFilename = process.argv[2]
@@ -29,11 +29,12 @@ const downloadFile = (async (url, path) => {
 const loadFromFile = (loadFilename) => {
   const apiSpecPath = path.join(process.cwd(), loadFilename);
   if (!fs.existsSync(apiSpecPath)) {
-    console.log(`FILE_NOT_FOUND: File: ${loadFilename} was not found in this directory.`)
+    print(`FILE_NOT_FOUND: File: ${loadFilename} was not found in this directory.`)
     exit()
   }
   return YAML.load(apiSpecPath);
 }
+printLogo()
 
 const loadFromURL = (url) => {
   return downloadFile(url, 'contract.yaml')
@@ -61,8 +62,11 @@ const switchLoadStrategy = (loadFilename) => {
   return loadFromFile(loadFilename)
 }
 // Load your OpenAPI YAML document
-
 const apiSpec = switchLoadStrategy(loadFilename)
+
+const getPort = (url) => new URL(url).port || 3000;
+
+const port = getPort(apiSpec.servers[0].url)
 
 const validator = new OpenApiValidator(apiSpec);
 
@@ -116,7 +120,7 @@ const actions = (req, res, example) => {
   }
 }
 
-const handleSingleExample = (example, req, res, type = 'GET') => {
+const handleSingleExample = (example, req, res, type = GET) => {
   if (example.action) {
     return actions(req, res, example)
   }
@@ -147,79 +151,40 @@ const getLocationAndQueryString = (queryString) => {
   };
 };
 
-const handleMultipleExamples = (examples, req, res) => {
+const handleMultipleExamples = (examples, req, res, type) => {
   const { defaultExample, ...examplesnotincluingdefault } = examples;
   Object.keys(examplesnotincluingdefault).forEach((key) => {
     const { location, param, query } = getLocationAndQueryString(key);
     console.log(location, param, query)
     if (req[location][param] === query) {
-      return handleSingleExample(examples[key].value, req, res);
+      return handleSingleExample(examples[key].value, req, res, type);
     } else {
-      return handleSingleExample(defaultExample.value, req, res);
+      return handleSingleExample(defaultExample.value, req, res, type);
     }
   });
-  return handleSingleExample(defaultExample.value, req, res);
+  return handleSingleExample(defaultExample.value, req, res, type);
 };
 
-const getRequest = (req, res, operation) => {
-  const example =
-    operation.responses["200"].content["application/json"].example || false;
-  const examples =
-    operation.responses["200"].content["application/json"].examples || false;
-  if (examples) {
-    handleMultipleExamples(examples, req, res);
-  }
-  if (example) {
-    return handleSingleExample(example, req, res);
-  }
-};
-
-
-const postRequest = (req, res, operation) => {
+const request = (req, res, operation, httpHeader) => {
   const example =
     operation.responses["200"].content["application/json"].example || false;
   const examples =
     operation.responses["200"].content["application/json"].examples || false;
 
   if (examples) {
-    handleMultipleExamples(examples, req, res);
+    handleMultipleExamples(examples, req, res, httpHeader);
   }
   if (example) {
-    return handleSingleExample(example, req, res, 'POST');
-  }
-
-}
-
-const switchHTTPHeaders = (httpHeader, req, res, operation) => {
-  switch (httpHeader) {
-    case 'post':
-      return postRequest(req, res, operation)
-    default:
-      return getRequest(req, res, operation);
-  }
-};
-
-const printHttpCode = (code) => {
-  switch (code) {
-    case 'POST':
-      return colors.inverse.bold.yellow(code)
-    case 'PUT':
-      return colors.inverse.bold.blue(code)
-    case 'DELETE':
-      return colors.inverse.bold.red(code)
-    default:
-      return colors.inverse.bold.green(code)
+    return handleSingleExample(example, req, res, httpHeader);
   }
 }
 
-// Serve the OpenAPI documentation using Swagger UI
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(apiSpec));
 // Generate routes and handlers dynamically from the OpenAPI specification
 for (const [path, pathItem] of Object.entries(apiSpec.paths)) {
   for (const [httpMethod, operation] of Object.entries(pathItem)) {
-    console.log(printHttpCode(httpMethod.toLocaleUpperCase()) + `: localhost:${port}${path}`);
+    printPath(uppercase(httpMethod), path)
     app[httpMethod](path, validator.validate(httpMethod, path), (req, res) => {
-      return switchHTTPHeaders(httpMethod, req, res, operation);
+      return request(req, res, operation, uppercase(httpMethod));
     });
   }
 }
@@ -235,7 +200,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`Server running @ localhost:${port}/`);
 });
 // IF examples is a list then itterate through them
 // examples as a list can give diffrent instructions to the app for instance: query/jurisdiction=ES,
