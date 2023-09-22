@@ -90,4 +90,4 @@ paths:
                   hello:
                     type: string
               example:
-                hello: world! as a PUT request
+                hello: world! as a DELETE request

@@ -12,7 +12,11 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const { printLogo, print, printPath } = require("./src/logger");
 const uppercase = require("./src/utils/uppercase");
-const { POST, GET } = require("./src/constants");
+const { GET } = require("./src/constants");
+const chain = require("./src/actions/chain");
+const redirect = require("./src/actions/redirect");
+const fileSend = require("./src/actions/fileSend");
+const transformValue = require("./src/utils/transformValue");
 app.use(bodyParser.json())
 app.use(cors())
 if (process.argv.length === 2) {
@@ -21,10 +25,7 @@ if (process.argv.length === 2) {
 }
 const loadFilename = process.argv[2]
 
-
-const downloadFile = (async (url, path) => {
-  //TODO: impliment
-})
+printLogo()
 
 const loadFromFile = (loadFilename) => {
   const apiSpecPath = path.join(process.cwd(), loadFilename);
@@ -34,33 +35,11 @@ const loadFromFile = (loadFilename) => {
   }
   return YAML.load(apiSpecPath);
 }
-printLogo()
-
-const loadFromURL = (url) => {
-  return downloadFile(url, 'contract.yaml')
-}
-
-const validateURL = (url) => {
-  try {
-    const url = new URL(loadFilename);
-    return url.href;
-  } catch {
-    return false
-  }
-}
-
-const transformRequestBody = (req, res, example) => {
-  let body = req.body;
-  let exampleString = JSON.stringify(example)
-  Object.keys(body).forEach((key) => {
-    exampleString = exampleString.replaceAll(`/{${key}}/`, body[key])
-  })
-  return JSON.parse(exampleString)
-};
 
 const switchLoadStrategy = (loadFilename) => {
   return loadFromFile(loadFilename)
 }
+
 // Load your OpenAPI YAML document
 const apiSpec = switchLoadStrategy(loadFilename)
 
@@ -73,7 +52,7 @@ const validator = new OpenApiValidator(apiSpec);
 const sendHtmlImage = (status) =>
   `<html><body><img src="https://http.cat/${status}"/></body></html`;
 
-const sendStatusCode = (code, req, res) => {
+const sendStatusCode = (code, res) => {
   const statusCodeInt = parseInt(code);
   if (Number.isInteger(statusCodeInt)) {
     res.status(statusCodeInt).send(sendHtmlImage(statusCodeInt));
@@ -83,38 +62,33 @@ const sendStatusCode = (code, req, res) => {
   return;
 };
 
-const sendDelayedResponse = (response, delay, req, res) => {
+const sendDelayedResponse = (value, delay, res, type) => {
   return res.setTimeout(parseInt(delay), () => {
-    res.json(response);
-  });
-};
-const sendDelayedStatusCode = (code, delay, req, res) => {
-  return res.setTimeout(parseInt(delay), () => {
-    return sendStatusCode(code, req, res)
+    if(type === 'FILE'){
+      return res.sendFile(value);
+    
+    }
+    if(type === 'REDIRECT'){
+      return res.redirect(value);
+    }
+    return res.send(value);
   });
 };
 
-const sendFile = (req, res, example) => {
-  const { path: filepath } = example.payload;
-  const fileLocation = path.join(process.cwd(), filepath)
-  if (fs.existsSync(fileLocation)) {
-    return res.sendFile(fileLocation);
-  }
-  return res.send(example);
-}
-const redirect = (req, res, example) => {
-  const { url: urlIn } = example.payload;
-  const url = new URL(urlIn)
-  return res.redirect(url.toString());
-  // return res.send(example);
-}
+const sendDelayedStatusCode = (code, delay, req, res) => {
+  return res.setTimeout(parseInt(delay), () => {
+    return sendStatusCode(code, res)
+  });
+};
 
 const actions = (req, res, example) => {
   switch (example.action) {
     case 'RETRIEVE_FILE':
-      return sendFile(req, res, example)
+      return fileSend(req, res, example);
     case 'REDIRECT':
-      return redirect(req, res, example)
+      return redirect(req, res, example);
+    case 'CHAIN':
+      return chain(req, res, example);
     default:
       res.send(example)
   }
@@ -125,20 +99,9 @@ const handleSingleExample = (example, req, res, type = GET) => {
     return actions(req, res, example)
   }
   if (type !== 'GET') {
-    example = transformRequestBody(req, res, example)
+    example = transformValue(example, req.body);
   }
-  const { delay = false, status = false } = req.query;
-  if (delay && status) {
-    sendDelayedStatusCode(status, delay, req, res)
-  }
-  if (delay) {
-    return sendDelayedResponse(example, delay, req, res);
-  }
-  if (status) {
-    return sendStatusCode(status, req, res);
-  }
-  res.json(example);
-  return;
+  return res.send(example);
 };
 
 const getLocationAndQueryString = (queryString) => {
@@ -155,7 +118,6 @@ const handleMultipleExamples = (examples, req, res, type) => {
   const { defaultExample, ...examplesnotincluingdefault } = examples;
   Object.keys(examplesnotincluingdefault).forEach((key) => {
     const { location, param, query } = getLocationAndQueryString(key);
-    console.log(location, param, query)
     if (req[location][param] === query) {
       return handleSingleExample(examples[key].value, req, res, type);
     } else {
@@ -165,17 +127,49 @@ const handleMultipleExamples = (examples, req, res, type) => {
   return handleSingleExample(defaultExample.value, req, res, type);
 };
 
+const buildResponse = (request, response) => {
+  const { delay = false, status = false } = request.query;
+
+  if (delay && status) {
+    return {
+      send: () => sendDelayedStatusCode(status, delay, request, response),
+      sendFile: () => sendDelayedStatusCode(status, delay, request, response),
+      redirect: () => sendDelayedStatusCode(status, delay, request, response)
+    } 
+  }
+  if (delay) {
+    return {
+      send: (payload) => sendDelayedResponse(payload, delay, response),
+      sendFile: (payload) => sendDelayedResponse(payload, delay, response, 'FILE'),
+      redirect: () => sendDelayedResponse(payload, delay, response, 'REDIRECT')
+    }
+  }
+  if (status) {
+    return {
+      send: () => sendStatusCode(status, response),
+      sendFile: () => sendStatusCode(status, response),
+      redirect: () => sendStatusCode(status, response)
+    }
+  }
+  return {
+    send: (payload) => response.send(payload),
+    sendFile: (payload) => response.sendFile(payload),
+    redirect: (payload) => response.redirect(payload)
+  }
+}
+
 const request = (req, res, operation, httpHeader) => {
+  const resp = buildResponse(req, res);
   const example =
     operation.responses["200"].content["application/json"].example || false;
   const examples =
     operation.responses["200"].content["application/json"].examples || false;
 
   if (examples) {
-    handleMultipleExamples(examples, req, res, httpHeader);
+    handleMultipleExamples(examples, req, resp, httpHeader);
   }
   if (example) {
-    return handleSingleExample(example, req, res, httpHeader);
+    return handleSingleExample(example, req, resp, httpHeader);
   }
 }
 
@@ -202,7 +196,3 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
   console.log(`Server running @ localhost:${port}/`);
 });
-// IF examples is a list then itterate through them
-// examples as a list can give diffrent instructions to the app for instance: query/jurisdiction=ES,
-// means look inside the request headers, find the jurisdiction property, if the jurisdition property is ES then return this example.
-// This can also be applied to headers and body props.

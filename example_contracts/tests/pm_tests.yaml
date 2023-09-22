@@ -1,0 +1,169 @@
+openapi: 3.0.1
+info:
+  title: Hello World
+  version: v0
+servers:
+  - url: http://localhost:3000
+    description: Server URL
+paths:
+  /helloworld:
+    get:
+      tags:
+        - Basic
+        - HelloWorld
+        - GET
+      operationId: helloworldget
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                properties:
+                  hello:
+                    type: string
+              example:
+                hello: world! as a GET request
+    post:
+      tags:
+        - Basic
+        - HelloWorld
+        - POST
+      operationId: helloworldpost
+      requestBody:
+          content:
+            application/json:
+              schema:
+                properties:
+                  hello:
+                    type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                properties:
+                  hello:
+                    type: string
+              example:
+                hello: world!
+                data: /{data}/
+    put:
+      tags:
+        - Basic
+        - HelloWorld
+        - PUT
+      operationId: helloworldput
+      requestBody:
+          content:
+            application/json:
+              schema:
+                properties:
+                  hello:
+                    type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                properties:
+                  hello:
+                    type: string
+              example:
+                hello: world! as a PUT request
+    delete:
+      tags:
+        - Basic
+        - HelloWorld
+        - DELETE
+      operationId: helloworlddelete
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                properties:
+                  hello:
+                    type: string
+              example:
+                hello: world! as a DELETE request
+  /redirect:
+    get:
+      tags:
+        - Basic
+        - redirect
+        - GET
+      operationId: redirectget
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                properties:
+                  hello:
+                    type: string
+              examples:
+                'defaultExample':
+                  value:
+                    action: 'REDIRECT'
+                    payload:
+                      url: 'https://dummyjson.com/products/1'
+  /file:
+    get:
+      tags:
+        - Basic
+        - HelloWorld
+        - GET
+      operationId: helloworldget
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                properties:
+                  hello:
+                    type: string
+              examples:
+                'defaultExample':
+                  value:
+                    action: 'RETRIEVE_FILE'
+                    payload:
+                      path: '/resources/files/example_file.json'
+  /chain:
+      get:
+        tags:
+          - Basic
+          - HelloWorld
+          - GET
+        operationId: helloworldget
+        responses:
+          '200':
+            description: OK
+            content:
+              'application/json':
+                schema:
+                  properties:
+                    hello:
+                      type: string
+                examples:
+                  'defaultExample':
+                    value:
+                      action: 'CHAIN'
+                      payload:
+                        chains:
+                          product:
+                            url: 'https://dummyjson.com/products/1'
+                          config:
+                            url: 'https://jsonplaceholder.typicode.com/todos/1'
+                        value:
+                          id: 54321
+                          item: /{product}/
+                          config: /{config}/
+
+
+
