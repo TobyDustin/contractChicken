@@ -17,6 +17,7 @@ const chain = require("./src/actions/chain");
 const redirect = require("./src/actions/redirect");
 const fileSend = require("./src/actions/fileSend");
 const transformValue = require("./src/utils/transformValue");
+const router = express.Router()
 app.use(bodyParser.json())
 app.use(cors())
 if (process.argv.length === 2) {
@@ -43,9 +44,9 @@ const switchLoadStrategy = (loadFilename) => {
 // Load your OpenAPI YAML document
 const apiSpec = switchLoadStrategy(loadFilename)
 
-const getPort = (url) => new URL(url).port || 3000;
+const getServerURL = (url) => new URL(url);
 
-const port = getPort(apiSpec.servers[0].url)
+
 
 const validator = new OpenApiValidator(apiSpec);
 
@@ -83,6 +84,8 @@ const sendDelayedStatusCode = (code, delay, req, res) => {
 
 const actions = (req, res, example) => {
   switch (example.action) {
+    case 'STATUS':
+      return res.sendStatusCode(example.payload)
     case 'RETRIEVE_FILE':
       return fileSend(req, res, example);
     case 'REDIRECT':
@@ -120,8 +123,6 @@ const handleMultipleExamples = (examples, req, res, type) => {
     const { location, param, query } = getLocationAndQueryString(key);
     if (req[location][param] === query) {
       return handleSingleExample(examples[key].value, req, res, type);
-    } else {
-      return handleSingleExample(defaultExample.value, req, res, type);
     }
   });
   return handleSingleExample(defaultExample.value, req, res, type);
@@ -134,27 +135,31 @@ const buildResponse = (request, response) => {
     return {
       send: () => sendDelayedStatusCode(status, delay, request, response),
       sendFile: () => sendDelayedStatusCode(status, delay, request, response),
-      redirect: () => sendDelayedStatusCode(status, delay, request, response)
+      redirect: () => sendDelayedStatusCode(status, delay, request, response),
+      sendStatusCode: (status) => sendStatusCode(status, response),
     } 
   }
   if (delay) {
     return {
       send: (payload) => sendDelayedResponse(payload, delay, response),
       sendFile: (payload) => sendDelayedResponse(payload, delay, response, 'FILE'),
-      redirect: () => sendDelayedResponse(payload, delay, response, 'REDIRECT')
+      redirect: () => sendDelayedResponse(payload, delay, response, 'REDIRECT'),
+      sendStatusCode: (status) => sendStatusCode(status, response),
     }
   }
   if (status) {
     return {
       send: () => sendStatusCode(status, response),
       sendFile: () => sendStatusCode(status, response),
-      redirect: () => sendStatusCode(status, response)
+      redirect: () => sendStatusCode(status, response),
+      sendStatusCode: (status) => sendStatusCode(status, response),
     }
   }
   return {
     send: (payload) => response.send(payload),
     sendFile: (payload) => response.sendFile(payload),
-    redirect: (payload) => response.redirect(payload)
+    redirect: (payload) => response.redirect(payload),
+    sendStatusCode: (status) => sendStatusCode(status, response)
   }
 }
 
@@ -177,14 +182,14 @@ const request = (req, res, operation, httpHeader) => {
 for (const [path, pathItem] of Object.entries(apiSpec.paths)) {
   for (const [httpMethod, operation] of Object.entries(pathItem)) {
     printPath(uppercase(httpMethod), path)
-    app[httpMethod](path, validator.validate(httpMethod, path), (req, res) => {
+    router[httpMethod](path, validator.validate(httpMethod, path), (req, res) => {
       return request(req, res, operation, uppercase(httpMethod));
     });
   }
 }
 
 // Handle errors
-app.use((err, req, res, next) => {
+router.use((err, req, res, next) => {
   if (err.status) {
     res.status(err.status).json({ error: err.message });
   } else {
@@ -193,6 +198,11 @@ app.use((err, req, res, next) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running @ localhost:${port}/`);
-});
+apiSpec.servers.forEach((server)=>{
+  const url = getServerURL(server.url);
+  const port = url.port || 3000;
+  app.use(url.pathname,router)
+  app.listen(port, () => {
+    console.log(`Server running @ ${url.toString()}`);
+  });
+})

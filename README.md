@@ -49,3 +49,15 @@ You can customize the HTTP status code returned from any endpoint in your contra
 Protochicken allows you to introduce delays to your responses, simulating slow network conditions. To add a delay, include the `delay=` query parameter in your request, specifying the delay time in milliseconds. This feature is particularly useful for testing under adverse network conditions.
 
 Feel free to explore Protochicken's capabilities and make your API development process more efficient and flexible. 🚀
+
+
+
+
+### Added Recently
+MULTIPLE servers
+chainng
+redirect url 
+postman tests
+
+### Coming Soon
+Chain specific data

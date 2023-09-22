@@ -1,0 +1,637 @@
+{
+	"info": {
+		"_postman_id": "6d5d8710-9169-4057-b732-1a7d45065046",
+		"name": "ProtoChicken_testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5888489"
+	},
+	"item": [
+		{
+			"name": "BASIC POST",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseBody = pm.response.json();",
+							"var expectedPayload = {",
+							"    \"hello\": \"world!\",",
+							"    \"data\": 'test_data'",
+							"};",
+							"",
+							"pm.test(\"Response body should contain the expected payload\", function () {",
+							"    pm.expect(responseBody).to.deep.equal(expectedPayload);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"data\": \"{{test_data}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/helloworld/",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"helloworld",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "BASIC PUT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseBody = pm.response.json();",
+							"var expectedPayload ={",
+							"    \"hello\": \"world! as a PUT request\"",
+							"};",
+							"",
+							"pm.test(\"Response body should contain the expected payload\", function () {",
+							"    pm.expect(responseBody).to.deep.equal(expectedPayload);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/helloworld/",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"helloworld",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "BASIC DELETE",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseBody = pm.response.json();",
+							"var expectedPayload = {",
+							"    \"hello\": \"world! as a DELETE request\"",
+							"};",
+							"",
+							"pm.test(\"Response body should contain the expected payload\", function () {",
+							"    pm.expect(responseBody).to.deep.equal(expectedPayload);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"data\": \"{{test_data}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/helloworld/",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"helloworld",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "BASIC GET",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseBody = pm.response.json();",
+							"var expectedPayload = {",
+							"    \"hello\": \"world! as a GET request\"",
+							"};",
+							"",
+							"pm.test(\"Response body should contain the expected payload\", function () {",
+							"    pm.expect(responseBody).to.deep.equal(expectedPayload);",
+							"});",
+							"",
+							"",
+							"var maxResponseTime = 100;",
+							"var responseTime = pm.response.responseTime;",
+							"",
+							"pm.test(\"Response time should be under \" + maxResponseTime + \" ms\", function () {",
+							"    pm.expect(responseTime).to.be.at.most(maxResponseTime);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/helloworld",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"helloworld"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "STATUS",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseStatus = pm.response.code;",
+							"",
+							"pm.test(\"Response status should be 500\", function () {",
+							"    pm.expect(responseStatus).to.equal(418);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/helloworld?status=418",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"helloworld"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "418"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "STATUS&DELAY",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseStatus = pm.response.code;",
+							"",
+							"pm.test(\"Response status should be 500\", function () {",
+							"    pm.expect(responseStatus).to.equal(418);",
+							"});",
+							"",
+							"var maxResponseTime = 100;",
+							"var responseTime = pm.response.responseTime;",
+							"",
+							"pm.test(\"Response time should be over \" + maxResponseTime + \" ms\", function () {",
+							"    pm.expect(responseTime).to.be.at.least(maxResponseTime);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/helloworld?status=418&delay=100",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"helloworld"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "418"
+						},
+						{
+							"key": "delay",
+							"value": "100"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELAY",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var maxResponseTime = 100;",
+							"var responseTime = pm.response.responseTime;",
+							"",
+							"pm.test(\"Response time should be over \" + maxResponseTime + \" ms\", function () {",
+							"    pm.expect(responseTime).to.be.at.least(maxResponseTime);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/helloworld?delay=100",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"helloworld"
+					],
+					"query": [
+						{
+							"key": "delay",
+							"value": "100"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "REDIRECT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseBody = pm.response.json();",
+							"var expectedPayload = {",
+							"    \"id\": 1,",
+							"    \"title\": \"iPhone 9\",",
+							"    \"description\": \"An apple mobile which is nothing like apple\",",
+							"    \"price\": 549,",
+							"    \"discountPercentage\": 12.96,",
+							"    \"rating\": 4.69,",
+							"    \"stock\": 94,",
+							"    \"brand\": \"Apple\",",
+							"    \"category\": \"smartphones\",",
+							"    \"thumbnail\": \"https://i.dummyjson.com/data/products/1/thumbnail.jpg\",",
+							"    \"images\": [",
+							"        \"https://i.dummyjson.com/data/products/1/1.jpg\",",
+							"        \"https://i.dummyjson.com/data/products/1/2.jpg\",",
+							"        \"https://i.dummyjson.com/data/products/1/3.jpg\",",
+							"        \"https://i.dummyjson.com/data/products/1/4.jpg\",",
+							"        \"https://i.dummyjson.com/data/products/1/thumbnail.jpg\"",
+							"    ]",
+							"};",
+							"",
+							"pm.test(\"Response body should contain the expected payload\", function () {",
+							"    pm.expect(responseBody).to.deep.equal(expectedPayload);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/redirect",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"redirect"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FILE",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseBody = pm.response.json();",
+							"var expectedPayload = {",
+							"    \"this\": \"is\",",
+							"    \"an\": \"example\"",
+							"};",
+							"",
+							"pm.test(\"Response body should contain the expected payload\", function () {",
+							"    pm.expect(responseBody).to.deep.equal(expectedPayload);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/file",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"file"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CHAIN",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseBody = pm.response.json();",
+							"var expectedPayload = {",
+							"    \"id\": 54321,",
+							"    \"item\": {",
+							"        \"id\": 1,",
+							"        \"title\": \"iPhone 9\",",
+							"        \"description\": \"An apple mobile which is nothing like apple\",",
+							"        \"price\": 549,",
+							"        \"discountPercentage\": 12.96,",
+							"        \"rating\": 4.69,",
+							"        \"stock\": 94,",
+							"        \"brand\": \"Apple\",",
+							"        \"category\": \"smartphones\",",
+							"        \"thumbnail\": \"https://i.dummyjson.com/data/products/1/thumbnail.jpg\",",
+							"        \"images\": [",
+							"            \"https://i.dummyjson.com/data/products/1/1.jpg\",",
+							"            \"https://i.dummyjson.com/data/products/1/2.jpg\",",
+							"            \"https://i.dummyjson.com/data/products/1/3.jpg\",",
+							"            \"https://i.dummyjson.com/data/products/1/4.jpg\",",
+							"            \"https://i.dummyjson.com/data/products/1/thumbnail.jpg\"",
+							"        ]",
+							"    },",
+							"    \"config\": {",
+							"        \"userId\": 1,",
+							"        \"id\": 1,",
+							"        \"title\": \"delectus aut autem\",",
+							"        \"completed\": false",
+							"    }",
+							"};",
+							"",
+							"pm.test(\"Response body should contain the expected payload\", function () {",
+							"    pm.expect(responseBody).to.deep.equal(expectedPayload);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/chain",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"chain"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MULTIPLE - default",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseBody = pm.response.json();",
+							"var expectedPayload = {",
+							"    \"response\": \"default\"",
+							"};",
+							"",
+							"pm.test(\"Response body should contain the expected payload\", function () {",
+							"    pm.expect(responseBody).to.deep.equal(expectedPayload);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/multiple",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"multiple"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MULTIPLE - headers",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseBody = pm.response.json();",
+							"var expectedPayload = {",
+							"    \"response\": \"test\",",
+							"    \"test\": \"headers is working!\"",
+							"};",
+							"",
+							"pm.test(\"Response body should contain the expected payload\", function () {",
+							"    pm.expect(responseBody).to.deep.equal(expectedPayload);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "test",
+						"value": "123",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:3000/multiple",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"multiple"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MULTIPLE - query",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseBody = pm.response.json();",
+							"var expectedPayload = {",
+							"    \"response\": \"test\",",
+							"    \"test\": \"test two was hit!\"",
+							"};",
+							"",
+							"pm.test(\"Response body should contain the expected payload\", function () {",
+							"    pm.expect(responseBody).to.deep.equal(expectedPayload);",
+							"}); "
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:3000/multiple?testtwo=123",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"multiple"
+					],
+					"query": [
+						{
+							"key": "testtwo",
+							"value": "123"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "test_data",
+			"value": "test_data",
+			"type": "string"
+		}
+	]
+}
