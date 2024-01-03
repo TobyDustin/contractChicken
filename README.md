@@ -1,7 +1,7 @@
 
 
 <p align="center">
-  <img src="./resources/logo.png" alt="Logo" width="150px"/>
+  <img src="./resources/logo.gif" alt="Logo" width="250px"/>
 </p>
 
 <h1 align="center">🐔 Protochicken</h1>
@@ -14,6 +14,18 @@
 Protochicken is a powerful command-line tool designed to expedite the process of mocking RESTful APIs effortlessly. It seamlessly integrates OpenAPI schemas, enhancing the speed and efficiency of API development.
 
 ## What Can Protochicken Do?
+![mock_service](resources/mock_service.png)
+*Mock a RESTful API service quickly*
+
+
+![mock_new_services](resources/new_service.png)
+*Mock new services in existing architecture*
+
+![link_services](resources/link_services.png)
+*Link existing services without any development time.*
+
+![prototype_architecture](resources/prototype_architecture.png)
+*Prototype your entire backend by chaining multiple protochicken services.*
 
 Protochicken empowers developers to:
 
@@ -49,8 +61,6 @@ You can customize the HTTP status code returned from any endpoint in your contra
 Protochicken allows you to introduce delays to your responses, simulating slow network conditions. To add a delay, include the `delay=` query parameter in your request, specifying the delay time in milliseconds. This feature is particularly useful for testing under adverse network conditions.
 
 Feel free to explore Protochicken's capabilities and make your API development process more efficient and flexible. 🚀
-
-
 
 
 ### Added Recently
