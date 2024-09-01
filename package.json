@@ -1,7 +1,7 @@
 {
-  "name": "protochicken",
+  "name": "contractchicken",
   "version": "0.0.23",
-  "description": "With Porto chicken you can quickly prototype restful api’s with open api schemas from a the command line.",
+  "description": "With contractChicken you can quickly prototype restful api’s with open api schemas from a the command line.",
   "repository": "https://github.com/TobyDustin/protochicken",
   "homepage": "https://github.com/TobyDustin/protochicken",
   "bin": "./index.js",
@@ -10,7 +10,7 @@
     "test": "jest"
   },
   "keywords": [
-    "protochicken"
+    "contractchicken"
   ],
   "author": "tobiasdustin",
   "license": "Apache-2.0 ",
