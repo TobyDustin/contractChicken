@@ -10,7 +10,7 @@ const app = express();
 const URL = require("url").URL;
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { printLogo, print, printPath } = require("./src/logger");
+const { printLogo, log, printPath } = require("./src/logger");
 const uppercase = require("./src/utils/uppercase");
 const { GET } = require("./src/constants");
 const chain = require("./src/actions/chain");
@@ -21,7 +21,7 @@ const router = express.Router()
 app.use(bodyParser.json())
 app.use(cors())
 if (process.argv.length === 2) {
-  print('NO_FILE_FOUND: Please provide a file to load!')
+  log('NO_FILE_PROVIDED: Please provide a file to load!')
   exit()
 }
 const loadFilename = process.argv[2]
@@ -31,7 +31,7 @@ printLogo()
 const loadFromFile = (loadFilename) => {
   const apiSpecPath = path.join(process.cwd(), loadFilename);
   if (!fs.existsSync(apiSpecPath)) {
-    print(`FILE_NOT_FOUND: File: ${loadFilename} was not found in this directory.`)
+    log(`FILE_NOT_FOUND: File: ${loadFilename} was not found in this directory.`)
     exit()
   }
   return YAML.load(apiSpecPath);
@@ -65,11 +65,11 @@ const sendStatusCode = (code, res) => {
 
 const sendDelayedResponse = (value, delay, res, type) => {
   return res.setTimeout(parseInt(delay), () => {
-    if(type === 'FILE'){
+    if (type === 'FILE') {
       return res.sendFile(value);
-    
+
     }
-    if(type === 'REDIRECT'){
+    if (type === 'REDIRECT') {
       return res.redirect(value);
     }
     return res.send(value);
@@ -137,7 +137,7 @@ const buildResponse = (request, response) => {
       sendFile: () => sendDelayedStatusCode(status, delay, request, response),
       redirect: () => sendDelayedStatusCode(status, delay, request, response),
       sendStatusCode: (status) => sendStatusCode(status, response),
-    } 
+    }
   }
   if (delay) {
     return {
@@ -198,10 +198,10 @@ router.use((err, req, res, next) => {
   }
 });
 
-apiSpec.servers.forEach((server)=>{
+apiSpec.servers.forEach((server) => {
   const url = getServerURL(server.url);
   const port = url.port || 3000;
-  app.use(url.pathname,router)
+  app.use(url.pathname, router)
   app.listen(port, () => {
     console.log(`Server running @ ${url.toString()}`);
   });

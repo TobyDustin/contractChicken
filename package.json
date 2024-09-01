@@ -1,6 +1,6 @@
 {
   "name": "contractchicken",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "description": "With contractChicken you can quickly prototype restful api’s with open api schemas from a the command line.",
   "repository": "https://github.com/TobyDustin/protochicken",
   "homepage": "https://github.com/TobyDustin/protochicken",
